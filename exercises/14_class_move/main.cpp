@@ -1,49 +1,74 @@
 #include "../exercise.h"
+#include <iostream>
+#include <utility>
 
-// READ: 左值右值（概念）<https://learn.microsoft.com/zh-cn/cpp/c-language/l-value-and-r-value-expressions?view=msvc-170>
-// READ: 左值右值（细节）<https://zh.cppreference.com/w/cpp/language/value_category>
-// READ: 关于移动语义 <https://learn.microsoft.com/zh-cn/cpp/cpp/rvalue-reference-declarator-amp-amp?view=msvc-170#move-semantics>
-// READ: 如果实现移动构造 <https://learn.microsoft.com/zh-cn/cpp/cpp/move-constructors-and-move-assignment-operators-cpp?view=msvc-170>
-
-// READ: 移动构造函数 <https://zh.cppreference.com/w/cpp/language/move_constructor>
-// READ: 移动赋值 <https://zh.cppreference.com/w/cpp/language/move_assignment>
-// READ: 运算符重载 <https://zh.cppreference.com/w/cpp/language/operators>
-
+// DynFibonacci 类
 class DynFibonacci {
     size_t *cache;
     int cached;
+    int capacity;
 
 public:
-    // TODO: 实现动态设置容量的构造器
-    DynFibonacci(int capacity): cache(new ?), cached(?) {}
+    // 实现动态设置容量的构造器
+    DynFibonacci(int capacity) : cache(new size_t[capacity]), cached(2), capacity(capacity) {
+        cache[0] = 0;
+        cache[1] = 1;
+    }
 
-    // TODO: 实现移动构造器
-    DynFibonacci(DynFibonacci &&) noexcept = delete;
+    // 禁用复制构造器
+    DynFibonacci(DynFibonacci const &) = delete;
+    DynFibonacci& operator=(DynFibonacci const &) = delete;
 
-    // TODO: 实现移动赋值
-    // NOTICE: ⚠ 注意移动到自身问题 ⚠
-    DynFibonacci &operator=(DynFibonacci &&) noexcept = delete;
+    // 实现移动构造器
+    DynFibonacci(DynFibonacci &&other) noexcept : cache(other.cache), cached(other.cached), capacity(other.capacity) {
+        other.cache = nullptr;
+        other.cached = 0;
+        other.capacity = 0;
+    }
 
-    // TODO: 实现析构器，释放缓存空间
-    ~DynFibonacci();
+    // 实现移动赋值运算符
+    DynFibonacci& operator=(DynFibonacci &&other) noexcept {
+        if (this != &other) { // 避免自移动赋值
+            delete[] cache;
 
-    // TODO: 实现正确的缓存优化斐波那契计算
+            cache = other.cache;
+            cached = other.cached;
+            capacity = other.capacity;
+
+            other.cache = nullptr;
+            other.cached = 0;
+            other.capacity = 0;
+        }
+        return *this;
+    }
+
+    // 实现析构器，释放缓存空间
+    ~DynFibonacci() {
+        delete[] cache;
+    }
+
+    // 实现正确的缓存优化斐波那契计算
     size_t operator[](int i) {
-        for (; false; ++cached) {
-            cache[cached] = cache[cached - 1] + cache[cached - 2];
+        if (i >= capacity) {
+            ASSERT(false, "Index out of bounds");
+        }
+        if (i >= cached) {
+            for (; cached <= i; ++cached) {
+                cache[cached] = cache[cached - 1] + cache[cached - 2];
+            }
         }
         return cache[i];
     }
 
-    // NOTICE: 不要修改这个方法
+    // const 修饰的重载方法
     size_t operator[](int i) const {
-        ASSERT(i <= cached, "i out of range");
+        ASSERT(i < cached, "Index out of bounds");
         return cache[i];
     }
 
-    // NOTICE: 不要修改这个方法
+    // 检查对象是否还活着
     bool is_alive() const {
-        return cache;
+        return cache != nullptr;
     }
 };
 

@@ -1,17 +1,18 @@
 ﻿#include "../exercise.h"
 #include <map>
 
-// READ: `std::map` <https://zh.cppreference.com/w/cpp/container/map>
-// READ: `std::unordered_map` <https://zh.cppreference.com/w/cpp/container/unordered_map>
-
+// 检查键是否存在于 std::map 中
 template<class k, class v>
 bool key_exists(std::map<k, v> const &map, k const &key) {
-    // TODO: 实现函数
+    // 使用 find 方法检查键是否存在
+    return map.find(key) != map.end();
 }
 
+// 设置 std::map 中的键值对
 template<class k, class v>
 void set(std::map<k, v> &map, k key, v value) {
-    // TODO: 实现函数
+    // 使用 operator[] 进行赋值
+    map[key] = value;
 }
 
 // ---- 不要修改以下代码 ----
